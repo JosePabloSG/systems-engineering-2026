@@ -18,9 +18,9 @@ Este documento describe la estructura de la base de datos y almacenamiento para 
 
 **Permisos:**
 - ✅ Cualquiera puede ver/descargar archivos
-- 🔒 Solo usuarios autenticados pueden subir archivos
-- 🔒 Solo usuarios autenticados pueden modificar archivos
-- 🔒 Solo usuarios autenticados pueden eliminar archivos
+- ✅ Cualquiera puede subir archivos (no requiere autenticación)
+- ✅ Cualquiera puede modificar archivos
+- ✅ Cualquiera puede eliminar archivos
 
 ---
 
@@ -86,8 +86,9 @@ Este documento describe la estructura de la base de datos y almacenamiento para 
 - Si se elimina la categoría, este campo se pone en null automáticamente
 
 **Permisos:**
-- ✅ Cualquiera puede ver memorias aprobadas
-- 🔒 Usuarios autenticados pueden crear nuevas memorias (quedan pendientes de aprobación)
+- ✅ Cualquiera puede ver memorias aprobadas (solo con status='approved')
+- ✅ Cualquiera puede crear nuevas memorias (no requiere autenticación, quedan pendientes de aprobación)
+- 🔒 Solo administradores pueden aprobar/rechazar memorias (cambiar status)
 
 ---
 
@@ -105,5 +106,7 @@ Este documento describe la estructura de la base de datos y almacenamiento para 
 
 - Todas las tablas tienen seguridad a nivel de filas (RLS) activada
 - El público solo puede ver memorias aprobadas y categorías activas
-- Subir archivos requiere estar autenticado
-- Los archivos en el bucket son de lectura pública una vez aprobados
+- **Cualquiera puede subir archivos y crear memorias (sin autenticación requerida)**
+- Las memorias creadas quedan en estado 'pending' hasta que un administrador las apruebe
+- Los archivos en el bucket son de lectura pública
+- Solo administradores pueden cambiar el estado de las memorias (aprobar/rechazar)
