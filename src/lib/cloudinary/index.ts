@@ -4,5 +4,6 @@
  */
 
 export { uploadToCloudinary } from './uploader'
+export { deleteFromCloudinary } from './deleter'
 export { getOptimizedImageUrl, getOptimizedVideoUrl, getResponsiveImageSrcSet } from './transformations'
 export { extractPublicId, isCloudinaryUrl } from './utils'
