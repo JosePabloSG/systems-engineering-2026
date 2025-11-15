@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -88,6 +87,8 @@ export default function MemoryUpload() {
           <button
             onClick={openModal}
             className="group relative w-72 cursor-pointer perspective"
+            aria-label="Crear nuevo recuerdo"
+            title="Agregar una nueva memoria"
           >
             {/* Polaroid-style card */}
             <div className="bg-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
@@ -144,6 +145,8 @@ export default function MemoryUpload() {
           <button
             onClick={() => setShowModal(false)}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            aria-label="Cerrar modal"
+            title="Cerrar ventana"
           >
             <svg
               className="w-6 h-6"
@@ -265,6 +268,8 @@ export default function MemoryUpload() {
                 onChange={(e) => setCategoryId(e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
                 disabled={categoriesLoading}
+                aria-label="Seleccionar categoría"
+                title="Selecciona una categoría para esta memoria"
               >
                 <option value="">Sin categoría</option>
                 {categories?.map((category) => (
