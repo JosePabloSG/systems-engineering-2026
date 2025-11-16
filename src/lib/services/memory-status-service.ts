@@ -5,12 +5,7 @@
  */
 
 import { createClient } from '@/utils/supabase/client'
-import { deleteFromCloudinary, extractPublicId } from '@/lib/cloudinary'
-import {
-  uploadToStorage,
-  deleteFromStorage,
-  generateFileName,
-} from './storage-service'
+import { deleteFromCloudinary } from '@/lib/cloudinary'
 import type { MemoryStatus, MediaType } from '@/types/memory'
 
 interface UpdateStatusParams {
@@ -79,7 +74,7 @@ async function handleRejectMemory(
 
 /**
  * Handle memory approval
- * Migrate from Cloudinary to Supabase Storage
+ * Update status only, keep Cloudinary URL
  */
 async function handleApproveMemory(
   memoryId: string,
@@ -88,46 +83,20 @@ async function handleApproveMemory(
 ): Promise<UpdateStatusResult> {
   const supabase = createClient()
 
-  try {
-    // Download from Cloudinary
-    const blob = await downloadFromCloudinary(cloudinaryUrl)
+  // Update status in database
+  const { error } = await supabase
+    .from('memories')
+    .update({ status: 'approved' })
+    .eq('id', memoryId)
 
-    // Generate filename and upload to Supabase Storage
-    const publicId = extractPublicId(cloudinaryUrl) || 'memory'
-    const fileName = generateFileName(publicId, mediaType)
-    const { publicUrl, path } = await uploadToStorage({
-      fileName,
-      blob,
-      contentType: blob.type,
-    })
+  if (error) {
+    throw new Error(`Error approving memory: ${error.message}`)
+  }
 
-    // Update database with new URL and status
-    const { error: updateError } = await supabase
-      .from('memories')
-      .update({
-        status: 'approved',
-        link: publicUrl,
-      })
-      .eq('id', memoryId)
-
-    if (updateError) {
-      // Rollback: delete from Supabase Storage
-      await deleteFromStorage(path)
-      throw new Error(`Error updating database: ${updateError.message}`)
-    }
-
-    // Cleanup: delete from Cloudinary
-    await deleteFromCloudinary(cloudinaryUrl, mediaType)
-
-    return {
-      memoryId,
-      status: 'approved',
-      action: 'approved',
-      newUrl: publicUrl,
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    throw new Error(`Error approving memory: ${message}`)
+  return {
+    memoryId,
+    status: 'approved',
+    action: 'approved',
   }
 }
 
@@ -150,15 +119,4 @@ async function handleDefaultUpdate(
   }
 
   return { memoryId, status, action: 'updated' }
-}
-
-/**
- * Download file from Cloudinary
- */
-async function downloadFromCloudinary(url: string): Promise<Blob> {
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error('Failed to download from Cloudinary')
-  }
-  return response.blob()
 }
